@@ -1,10 +1,8 @@
 ---
-title: "bellabeat_analysis"
+title: "Bellabeat_Analysis"
 author: "Nicole Pierre"
 date: "10/13/2025"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -178,6 +176,7 @@ calories_over_time <- ggplot(data = df_avg_by_hour, aes(x=Time, y=avg_value)) +
   theme(axis.text.x = element_text(angle = 90)) +
   geom_text(aes(label = ifelse(avg_value == max(avg_value), as.character(round(avg_value), digits = 2), "")), color = "blue", vjust = -.25)
 calories_over_time
+ggsave("Calories Burned Over Time.png")
 ```
 
 
@@ -201,6 +200,7 @@ steps_over_time <- ggplot(data = df_avgStep_by_hour, aes(x=Time, y=avg_value)) +
   theme(axis.text.x = element_text(angle = 90)) +
   geom_text(aes(label = ifelse(avg_value == max(avg_value), as.character(round(avg_value), digits = 2), "")), color = "blue", vjust = -.25)
 steps_over_time
+ggsave("Average Steps Over Time.png")
 ```
 
 
@@ -213,6 +213,7 @@ cal_step_plot <- ggplot(merged_df, aes(x = StepTotal, y = Calories)) +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
   ggtitle("Calories vs Step Total") 
 cal_step_plot
+ggsave("Calories vs Steps.png")
 ```
 
 
@@ -238,6 +239,7 @@ calories_per_id <- ggplot(avg_dailyCalories_df2,
     labs(x = "User Id", y = "Calories") 
   #geom_text(aes(label = round(avg_value)), vjust = 0)
 calories_per_id
+ggsave("Daily Average Calories Burned Per User.png")
 ```
 
 In the above bar graph, you can see that the bars that reach 2000 calories burned are colored green and the ones that fall short are red. Studies show that you need to be in a 500 calorie deficit to lose a pound a week. This means you need to burn 500 more calories than you consume per day. If the average women consumes 1500 calories per day then they would need to burn atleast 2000 calories to be on track to lose a pound in a week. After analyzing the data we have some fitbit users meeting that goal and some that are not. 
