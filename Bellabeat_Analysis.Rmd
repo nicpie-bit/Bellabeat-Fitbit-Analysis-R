@@ -2,7 +2,9 @@
 title: "bellabeat_analysis"
 author: "Nicole Pierre"
 date: "10/13/2025"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -34,18 +36,20 @@ The data used for this analysis was collected from fitbit users and can be found
 
 First, lets load the datasets into R.
 
+
 ```{r load data sets}
-activity <- read.csv("/Users/nicolebroussard/Documents/Google Data Analytics Cert /Case Study/Data/dailyActivity_merged.csv")
-calories <- read.csv("/Users/nicolebroussard/Documents/Google Data Analytics Cert /Case Study/Data/hourlyCalories_merged.csv")
-heartrate <- read.csv("/Users/nicolebroussard/Documents/Google Data Analytics Cert /Case Study/Data/heartrate_seconds_merged.csv")
-intensities <- read_csv("/Users/nicolebroussard/Documents/Google Data Analytics Cert /Case Study/Data/hourlyIntensities_merged.csv")
-steps <- read_csv("/Users/nicolebroussard/Documents/Google Data Analytics Cert /Case Study/Data/hourlySteps_merged.csv")
+activity <- read.csv("/Users/nicolebroussard/Documents/Google_DA_Cert /Case Study/Bellabeat-Fitbit-Analysis-R/Data/dailyActivity_merged.csv")
+calories <- read.csv("/Users/nicolebroussard/Documents/Google_DA_Cert /Case Study/Bellabeat-Fitbit-Analysis-R/Data/hourlyCalories_merged.csv")
+heartrate <- read.csv("/Users/nicolebroussard/Documents/Google_DA_Cert /Case Study/Bellabeat-Fitbit-Analysis-R/Data/heartrate_seconds_merged.csv")
+intensities <- read_csv("/Users/nicolebroussard/Documents/Google_DA_Cert /Case Study/Bellabeat-Fitbit-Analysis-R/Data/hourlyIntensities_merged.csv")
+steps <- read_csv("/Users/nicolebroussard/Documents/Google_DA_Cert /Case Study/Bellabeat-Fitbit-Analysis-R/Data/hourlySteps_merged.csv")
 ```
 
 
 # Fix Data Types
 
 After viewing the data sets, the date column data types are incorrect. The date columns should be a datetime string. While changing the data type I will be splitting the date and time into two different columns for analysis.
+
 
 ```{r fix data types}
 #activity
@@ -68,14 +72,16 @@ steps$ActivityHour <- as.POSIXct(steps$ActivityHour, format = "%m/%d/%Y %I:%M:%S
 ```
 
 
-```{r fix data types}
+```{r fix data types2}
 steps$Date <- format(steps$ActivityHour, "%m/%d/%y")
 steps$Time <- format(steps$ActivityHour, "%H:%M:%S")
 ```
 
 # Search for NA Values
 
+
 Now let's search for NA values that could cause issues during our analysis. 
+
 
 ```{r NA}
 colSums(is.na(activity))
@@ -87,29 +93,38 @@ sum(is.na(steps))
 
 # Summarize the Data
 
+
 Now that the data is clean, I will use the summarize function to gather some insights into the columns in each data set.   
+
 
 ```{r sum activity}
 summary(activity)
 ```
 
+
 Looking at these insights, the average steps tracked by these users per day is 6,547. As well as the average calories burned are 2,189. The LightActiveDistance has the highest average over VeryActive, ModeratelyActive, and SedentaryActive. This makes sense because normally people only hit moderate or very active when they are in a workout. Most of the time people are commuting to and from places which would fall under LightActive. 
+
 
 ```{r sum calories}
 summary(calories)
 ```
 
+
 The average calories burned in an hour is 94.
+
 
 ```{r sum heartrate}
 summary(heartrate)
 ```
 
+
 Your heart rate during exercise should fall within the 50%-85% range of your maximum heart rate. To put some of these values into perspecive, I calculated my target heart rate zone. As a 27 year old female my estimated target heart rate zone is 96.5 - 164.05. When I get past the middle of this range (~135), I get into the moderate intensitiy zone. The average heart rate from this data is 79.76. The avergae isn't much use since it is avergaing all heartrates throughout the day (resting and active). This number would need more context like age data or what someone's heart rate is during certain levels of intensity to truly understand its meaning.
+
 
 ```{r sum steps}
 summary(steps)
 ```
+
 
 The average steps in an hour is 286.
 
@@ -117,17 +132,20 @@ The average steps in an hour is 286.
 
 This will show us how many people's data are in each data set we will use for analysis. 
 
+
 ```{r}
 n_distinct(activity$Id)
 n_distinct(steps$Id)
 n_distinct(calories$Id)
 ```
 
+
 Normally, we would like a larger number of participants to make sure our data isn't biased to a specific group of people.
 
 # Merge the Data
 
 Merging the data sets allows me to only analyze the data needed to answer our business questions. 
+
 
 ```{r merge cal and steps}
 merged_df <- inner_join(calories, steps, by = c("Id", "ActivityHour", "Date", "Time"))
@@ -149,6 +167,7 @@ df_avg_by_hour_sorted <- arrange(df_avg_by_hour, desc(avg_value))
 
 We will start by analyzing calorie and step data separately and then together.  
 
+
 ```{r line plot}
 calories_over_time <- ggplot(data = df_avg_by_hour, aes(x=Time, y=avg_value)) +
   geom_line(aes(group=1)) +
@@ -161,16 +180,18 @@ calories_over_time <- ggplot(data = df_avg_by_hour, aes(x=Time, y=avg_value)) +
 calories_over_time
 ```
 
+
 By looking at the line graph you can see that the time of day with the highest average calories burned is at 19:00 or 7:00 PM. The hour between 6:00 PM and 7:00PM seems to be the hour the participants burn the most calories. 
 
-```{r}
+
+```{r find avg steps}
 df_avgStep_by_hour <- merged_df %>%
   group_by(Time) %>%
   summarise(avg_value = mean(StepTotal, na.rm = TRUE))
 ```
 
 
-```{r}
+```{r steps line graph}
 steps_over_time <- ggplot(data = df_avgStep_by_hour, aes(x=Time, y=avg_value)) +
   geom_line(aes(group=1)) +
   geom_point() +
@@ -182,9 +203,11 @@ steps_over_time <- ggplot(data = df_avgStep_by_hour, aes(x=Time, y=avg_value)) +
 steps_over_time
 ```
 
+
 Looking at the line graph, the hour with the highest average step count is also 19:00 or 7:00 PM.
 
-```{r}
+
+```{r scatterplot}
 cal_step_plot <- ggplot(merged_df, aes(x = StepTotal, y = Calories)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
@@ -192,7 +215,9 @@ cal_step_plot <- ggplot(merged_df, aes(x = StepTotal, y = Calories)) +
 cal_step_plot
 ```
 
+
 If it wasn't clear already this scatterplot shows a correlation between calories burned and step count per day. When the step total increases the calories burned increases. 
+
 
 ```{r Avg Calorie per ID}
 avg_dailyCalories_df <- activity %>%
